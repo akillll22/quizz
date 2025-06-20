@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'quiz_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  // Data kategori kuis
   final List<Map<String, dynamic>> categories = const [
     {
       'title': 'Pengetahuan Umum',
@@ -33,7 +33,6 @@ class HomePage extends StatelessWidget {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
-
           return Card(
             color: category['color'].withOpacity(0.1),
             margin: const EdgeInsets.only(bottom: 16),
@@ -49,10 +48,14 @@ class HomePage extends StatelessWidget {
               ),
               trailing: ElevatedButton(
                 onPressed: () {
-                  // Sementara hanya tampilkan snackbar
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Mulai kuis: ${category['title']}'),
+                  String fileName = category['title']
+                      .toString()
+                      .toLowerCase()
+                      .replaceAll(' ', '_');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QuizPage(category: fileName),
                     ),
                   );
                 },
