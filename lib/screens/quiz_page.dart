@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizPage extends StatefulWidget {
   final String category;
-
   const QuizPage({super.key, required this.category});
 
   @override
@@ -48,7 +48,27 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
-  void _showResult() {
+  Future<void> _saveResult() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getStringList('quiz_history') ?? [];
+
+    final now = DateTime.now().toIso8601String();
+    final newData = json.encode({
+      'category': widget.category,
+      'score': _score,
+      'total': _questions.length,
+      'time': now,
+    });
+
+    print('MENYIMPAN RIWAYAT: $newData');
+
+    existing.add(newData);
+    await prefs.setStringList('quiz_history', existing);
+  }
+
+  void _showResult() async {
+    await _saveResult();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
