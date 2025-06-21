@@ -1,0 +1,12 @@
+[
+  {
+    "question": "Ibu kota Indonesia adalah...",
+    "options": ["Bandung", "Surabaya", "Jakarta", "Medan"],
+    "answer": "Jakarta"
+  },
+  {
+    "question": "Benda langit yang mengelilingi bumi adalah...",
+    "options": ["Matahari", "Mars", "Bulan", "Saturnus"],
+    "answer": "Bulan"
+  }
+]
