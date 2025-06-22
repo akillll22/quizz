@@ -14,32 +14,28 @@ class ProfilePage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
             SizedBox(height: 20),
             Center(
               child: CircleAvatar(
                 radius: 60,
-                backgroundImage: AssetImage('assets/fotoprofile.jpg'),
-                backgroundColor:
-                    Colors.grey, // fallback warna jika gambar gagal
+                backgroundImage: AssetImage('assets/questions/fotoprofile.jpg'),
+                backgroundColor: Colors.grey,
               ),
             ),
             SizedBox(height: 24),
             Text(
-              'Nama   : Mutawakkil Rohmatillah',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 12),
-            Text('NPM    : 2023020100028', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 12),
-            Text('Prodi  : Teknik Informatika', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 12),
-            Text('Semester: 4', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 12),
-            Text(
-              'Kampus : Universitas Islam Madura (UIM)',
-              style: TextStyle(fontSize: 18),
+              'Nama: Mutawakkil Rohmatillah\n'
+              'NPM: 2023020100028\n'
+              'Prodi: Teknik Informatika\n'
+              'Semester: 4\n'
+              'Kampus: Universitas Islam Madura (UIM)\n'
+              'Alamat: Pakamban Laok, Pragaan, Sumenep\n'
+              'Motto: Lebih baik kalah, daripada menyerah\n'
+              'Visi Misi: Memajukan peradaban',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),
