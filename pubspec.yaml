@@ -1,7 +1,7 @@
 name: kuisku
 description: Aplikasi kuis interaktif Flutter bernama KuisKu.
 
-publish_to: 'none' # biar tidak di-publish ke pub.dev
+publish_to: 'none'
 
 version: 1.0.0+1
 
@@ -11,29 +11,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # Paket ikon iOS-style (default)
   cupertino_icons: ^1.0.2
-
-  # Font keren dari Google Fonts
   google_fonts: ^6.1.0
-
-  # Untuk part berikutnya (Part 4+): menyimpan skor lokal
   shared_preferences: ^2.2.2
-
-  # Untuk animasi loading/progress (nanti dipakai di quiz)
   percent_indicator: ^4.2.3
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
-
   uses-material-design: true
 
   assets:
-    - assets/questions/ # folder untuk soal kuis (JSON), dipakai di Part 3+
-    # - assets/images/   # aktifkan ini kalau kamu mau pakai gambar
+    - assets/questions/fotoprofile.jpg
+    - assets/icon/icon.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
