@@ -7,14 +7,17 @@ class HomePage extends StatelessWidget {
   final List<Map<String, dynamic>> categories = const [
     {
       'title': 'Pengetahuan Umum',
+      'apiId': 9,
       'color': Colors.blue,
     },
     {
-      'title': 'Bahasa Indonesia',
+      'title': 'Ilmu Komputer',
+      'apiId': 18,
       'color': Colors.green,
     },
     {
       'title': 'Matematika',
+      'apiId': 19,
       'color': Colors.red,
     },
   ];
@@ -48,14 +51,13 @@ class HomePage extends StatelessWidget {
               ),
               trailing: ElevatedButton(
                 onPressed: () {
-                  String fileName = category['title']
-                      .toString()
-                      .toLowerCase()
-                      .replaceAll(' ', '_');
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => QuizPage(category: fileName),
+                      builder: (_) => QuizPage(
+                        categoryName: category['title'],
+                        categoryId: category['apiId'],
+                      ),
                     ),
                   );
                 },

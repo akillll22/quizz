@@ -1,18 +1,25 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizPage extends StatefulWidget {
-  final String category;
-  const QuizPage({super.key, required this.category});
+  final String categoryName;
+  final int categoryId;
+
+  const QuizPage({
+    super.key,
+    required this.categoryName,
+    required this.categoryId,
+  });
 
   @override
   State<QuizPage> createState() => _QuizPageState();
 }
 
 class _QuizPageState extends State<QuizPage> {
-  List<dynamic> _questions = [];
+  List<Map<String, dynamic>> _questions = [];
   int _currentIndex = 0;
   int _score = 0;
   bool _isLoading = true;
@@ -20,17 +27,38 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
+    _fetchQuestions();
   }
 
-  Future<void> _loadQuestions() async {
-    final path = 'assets/questions/${widget.category}.json';
-    final data = await rootBundle.loadString(path);
-    final decoded = json.decode(data);
-    setState(() {
-      _questions = decoded;
-      _isLoading = false;
-    });
+  Future<void> _fetchQuestions() async {
+    final url = Uri.parse(
+      'https://opentdb.com/api.php?amount=5&category=${widget.categoryId}&type=multiple',
+    );
+
+    try {
+      final response = await http.get(url);
+      final data = json.decode(response.body);
+
+      final List<Map<String, dynamic>> fetchedQuestions = [];
+
+      for (var item in data['results']) {
+        final options = [...item['incorrect_answers'], item['correct_answer']];
+        options.shuffle(Random());
+
+        fetchedQuestions.add({
+          'question': Uri.decodeComponent(item['question']),
+          'options': options.map((e) => Uri.decodeComponent(e)).toList(),
+          'answer': Uri.decodeComponent(item['correct_answer']),
+        });
+      }
+
+      setState(() {
+        _questions = fetchedQuestions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('❌ ERROR FETCH API: $e');
+    }
   }
 
   void _answer(String selected) {
@@ -54,13 +82,11 @@ class _QuizPageState extends State<QuizPage> {
 
     final now = DateTime.now().toIso8601String();
     final newData = json.encode({
-      'category': widget.category,
+      'category': widget.categoryName,
       'score': _score,
       'total': _questions.length,
       'time': now,
     });
-
-    print('MENYIMPAN RIWAYAT: $newData');
 
     existing.add(newData);
     await prefs.setStringList('quiz_history', existing);
@@ -98,7 +124,7 @@ class _QuizPageState extends State<QuizPage> {
     final current = _questions[_currentIndex];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kuis'),
+        title: Text(widget.categoryName),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -114,10 +140,10 @@ class _QuizPageState extends State<QuizPage> {
             const SizedBox(height: 16),
             Text(
               current['question'],
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            ...(current['options'] as List<dynamic>).map(
+            ...(current['options'] as List<String>).map(
               (option) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: ElevatedButton(
