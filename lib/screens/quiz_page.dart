@@ -8,11 +8,15 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 class QuizPage extends StatefulWidget {
   final String categoryName;
   final int categoryId;
+  final int amount;
+  final String difficulty;
 
   const QuizPage({
     super.key,
     required this.categoryName,
     required this.categoryId,
+    this.amount = 5,
+    this.difficulty = 'easy',
   });
 
   @override
@@ -33,7 +37,7 @@ class _QuizPageState extends State<QuizPage> {
 
   Future<void> _fetchQuestions() async {
     final url = Uri.parse(
-      'https://opentdb.com/api.php?amount=5&category=${widget.categoryId}&type=multiple',
+      'https://opentdb.com/api.php?amount=${widget.amount}&category=${widget.categoryId}&difficulty=${widget.difficulty}&type=multiple',
     );
 
     try {
@@ -127,7 +131,9 @@ class _QuizPageState extends State<QuizPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoryName),
+        title: Text(
+          '${widget.categoryName} (${widget.difficulty}) - ${widget.amount} soal',
+        ),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),

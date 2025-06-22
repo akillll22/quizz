@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import 'screens/home_page.dart';
-import 'screens/history_page.dart';
-import 'screens/profile_page.dart';
+import 'package:kuisku/screens/home_page.dart';
+import 'package:kuisku/screens/history_page.dart';
+import 'package:kuisku/screens/profile_page.dart';
 
 void main() {
-  runApp(const KuisKuApp());
+  runApp(const MyApp());
 }
 
-class KuisKuApp extends StatelessWidget {
-  const KuisKuApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'KuisKu',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.deepPurple, useMaterial3: true),
+      title: 'KuisKu',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        useMaterial3: true,
+      ),
       home: const MainPage(),
     );
   }
@@ -31,7 +34,11 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [HomePage(), HistoryPage(), ProfilePage()];
+  final List<Widget> _pages = const [
+    HomePage(),
+    HistoryPage(),
+    ProfilePage(),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,10 +56,7 @@ class _MainPageState extends State<MainPage> {
         selectedItemColor: Colors.deepPurple,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Riwayat',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
