@@ -11,7 +11,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  List<Map<String, dynamic>> _history = [];
+  List<String> _rawHistory = [];
 
   @override
   void initState() {
@@ -24,16 +24,31 @@ class _HistoryPageState extends State<HistoryPage> {
     final data = prefs.getStringList('quiz_history') ?? [];
 
     setState(() {
-      _history = data
-          .map((e) => json.decode(e) as Map<String, dynamic>)
-          .toList()
-          .reversed
-          .toList();
+      _rawHistory = data.reversed.toList(); // tampilkan terbaru di atas
     });
+  }
+
+  Future<void> _deleteItem(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final realIndex =
+        _rawHistory.length - 1 - index; // karena kita balik tampilannya
+
+    _rawHistory.removeAt(index);
+    await prefs.setStringList('quiz_history', _rawHistory.reversed.toList());
+
+    setState(() {});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Riwayat berhasil dihapus')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final parsed =
+        _rawHistory.map((e) => json.decode(e) as Map<String, dynamic>).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Riwayat Kuis',
@@ -41,14 +56,14 @@ class _HistoryPageState extends State<HistoryPage> {
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
-      body: _history.isEmpty
+      body: parsed.isEmpty
           ? const Center(child: Text('Belum ada kuis yang dikerjakan.'))
           : ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: _history.length,
+              itemCount: parsed.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final item = _history[index];
+                final item = parsed[index];
                 final time = DateTime.parse(item['time']).toLocal();
 
                 return Card(
@@ -65,6 +80,11 @@ class _HistoryPageState extends State<HistoryPage> {
                     subtitle: Text(
                       '${item['score']} dari ${item['total']} soal\n${time.day}/${time.month}/${time.year} ${time.hour}:${time.minute}',
                       style: GoogleFonts.poppins(fontSize: 14),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => _deleteItem(index),
+                      tooltip: 'Hapus riwayat ini',
                     ),
                   ),
                 );
