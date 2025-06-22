@@ -5,8 +5,45 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Profil Pengguna', style: TextStyle(fontSize: 20)),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profil Pembuat'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            SizedBox(height: 20),
+            Center(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: AssetImage('assets/fotoprofile.jpg'),
+                backgroundColor:
+                    Colors.grey, // fallback warna jika gambar gagal
+              ),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Nama   : Mutawakkil Rohmatillah',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 12),
+            Text('NPM    : 2023020100028', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 12),
+            Text('Prodi  : Teknik Informatika', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 12),
+            Text('Semester: 4', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 12),
+            Text(
+              'Kampus : Universitas Islam Madura (UIM)',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
