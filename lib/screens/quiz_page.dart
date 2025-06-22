@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class QuizPage extends StatefulWidget {
   final String categoryName;
@@ -122,6 +123,8 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     final current = _questions[_currentIndex];
+    final progress = (_currentIndex + 1) / _questions.length;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.categoryName),
@@ -133,9 +136,27 @@ class _QuizPageState extends State<QuizPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Soal ${_currentIndex + 1} dari ${_questions.length}',
-              style: const TextStyle(fontSize: 18),
+            LinearPercentIndicator(
+              lineHeight: 10.0,
+              percent: progress,
+              progressColor: Colors.deepPurple,
+              backgroundColor: Colors.grey[300],
+              barRadius: const Radius.circular(8),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Soal ${_currentIndex + 1}/${_questions.length}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  'Skor: $_score',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(
