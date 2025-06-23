@@ -21,22 +21,26 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getStringList('quiz_history') ?? [];
-
-    final parsed =
-        data.map((e) => json.decode(e) as Map<String, dynamic>).toList();
+    final stored = prefs.getStringList('quiz_history') ?? [];
 
     setState(() {
-      _history = parsed.reversed.toList(); // urut dari terbaru
+      _history = stored
+          .map((item) => json.decode(item) as Map<String, dynamic>)
+          .toList()
+          .reversed
+          .toList();
     });
   }
 
-  Future<void> _clearHistory() async {
+  Future<void> _deleteItem(int index) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('quiz_history');
-    setState(() {
-      _history = [];
-    });
+    final stored = prefs.getStringList('quiz_history') ?? [];
+
+    final realIndex = stored.length - 1 - index;
+    stored.removeAt(realIndex);
+
+    await prefs.setStringList('quiz_history', stored);
+    _loadHistory();
   }
 
   @override
@@ -46,17 +50,14 @@ class _HistoryPageState extends State<HistoryPage> {
         title: const Text('Riwayat Kuis'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
-        actions: [
-          if (_history.isNotEmpty)
-            IconButton(
-              onPressed: _clearHistory,
-              icon: const Icon(Icons.delete_forever),
-              tooltip: 'Hapus Semua',
-            ),
-        ],
       ),
       body: _history.isEmpty
-          ? const Center(child: Text('Tidak ada riwayat.'))
+          ? const Center(
+              child: Text(
+                'Belum ada riwayat kuis.',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: _history.length,
@@ -64,23 +65,26 @@ class _HistoryPageState extends State<HistoryPage> {
                 final item = _history[index];
                 final date = DateFormat('dd MMM yyyy HH:mm')
                     .format(DateTime.parse(item['time']));
+
                 return Card(
-                  elevation: 2,
-                  margin: const EdgeInsets.only(bottom: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
+                    leading: const Icon(Icons.quiz, color: Colors.deepPurple),
                     title: Text(
-                      item['category'],
+                      '${item['category']} - ${item['score']}/${item['total']}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
-                    subtitle:
-                        Text('Skor: ${item['score']}/${item['total']}\n$date'),
-                    isThreeLine: true,
+                    subtitle: Text(date),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: () => _deleteItem(index),
+                    ),
                   ),
                 );
               },
