@@ -42,35 +42,83 @@ class _QuizPageState extends State<QuizPage> {
 
     try {
       final response = await http.get(url);
-      final data = json.decode(response.body);
 
-      final List<Map<String, dynamic>> fetchedQuestions = [];
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
 
-      for (var item in data['results']) {
-        final options = [...item['incorrect_answers'], item['correct_answer']];
-        options.shuffle(Random());
+        if (data['response_code'] != 0 || data['results'].isEmpty) {
+          if (mounted) {
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Soal Tidak Ditemukan'),
+                content: const Text(
+                    'Tidak ada soal untuk kategori atau tingkat kesulitan ini.\nCoba pengaturan lain.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return;
+        }
 
-        fetchedQuestions.add({
-          'question': Uri.decodeComponent(item['question']),
-          'options': options.map((e) => Uri.decodeComponent(e)).toList(),
-          'answer': Uri.decodeComponent(item['correct_answer']),
+        final List<Map<String, dynamic>> fetchedQuestions = [];
+
+        for (var item in data['results']) {
+          final options = [
+            ...item['incorrect_answers'],
+            item['correct_answer']
+          ];
+          options.shuffle(Random());
+
+          fetchedQuestions.add({
+            'question': Uri.decodeFull(item['question']),
+            'options': options.map((e) => Uri.decodeFull(e)).toList(),
+            'answer': Uri.decodeFull(item['correct_answer']),
+          });
+        }
+
+        setState(() {
+          _questions = fetchedQuestions;
+          _isLoading = false;
         });
+      } else {
+        throw Exception('Status bukan 200');
       }
-
-      setState(() {
-        _questions = fetchedQuestions;
-        _isLoading = false;
-      });
     } catch (e) {
-      print('❌ ERROR FETCH API: $e');
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Koneksi Gagal'),
+            content: const Text(
+              'Gagal menghubungi API. Pastikan koneksi internet aktif dan coba lagi.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
   void _answer(String selected) {
     final correct = _questions[_currentIndex]['answer'];
-    if (selected == correct) {
-      _score++;
-    }
+    if (selected == correct) _score++;
 
     if (_currentIndex < _questions.length - 1) {
       setState(() {
@@ -99,7 +147,6 @@ class _QuizPageState extends State<QuizPage> {
 
   void _showResult() async {
     await _saveResult();
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -112,7 +159,7 @@ class _QuizPageState extends State<QuizPage> {
               Navigator.pop(context);
             },
             child: const Text('Kembali'),
-          )
+          ),
         ],
       ),
     );
@@ -160,26 +207,54 @@ class _QuizPageState extends State<QuizPage> {
                 Text(
                   'Skor: $_score',
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              current['question'],
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  current['question'],
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             ...(current['options'] as List<String>).map(
               (option) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () => _answer(option),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    minimumSize: const Size.fromHeight(50),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.deepPurple, width: 1.2),
                   ),
-                  child: Text(option),
+                  child: ListTile(
+                    title: Text(
+                      option,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    onTap: () => _answer(option),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
                 ),
               ),
             ),
