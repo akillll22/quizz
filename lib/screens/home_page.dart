@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kuisku/screens/quiz_page.dart';
+import 'quiz_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -40,8 +40,10 @@ class HomePage extends StatelessWidget {
                     value: selectedAmount,
                     decoration: const InputDecoration(labelText: 'Jumlah Soal'),
                     items: [5, 10, 15]
-                        .map((e) =>
-                            DropdownMenuItem(value: e, child: Text('$e Soal')))
+                        .map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Text('$e Soal'),
+                            ))
                         .toList(),
                     onChanged: (value) {
                       if (value != null) {
@@ -57,7 +59,10 @@ class HomePage extends StatelessWidget {
                     decoration:
                         const InputDecoration(labelText: 'Tingkat Kesulitan'),
                     items: ['easy', 'medium', 'hard']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e.toUpperCase()),
+                            ))
                         .toList(),
                     onChanged: (value) {
                       if (value != null) {
@@ -103,7 +108,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pilih Kategori Kuis'),
+        title: const Text('Beranda'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         centerTitle: true,
@@ -116,7 +121,12 @@ class HomePage extends StatelessWidget {
           return Card(
             color: category['color'].withOpacity(0.1),
             margin: const EdgeInsets.only(bottom: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               leading: Icon(Icons.quiz, color: category['color']),
               title: Text(
                 category['title'],
@@ -134,6 +144,10 @@ class HomePage extends StatelessWidget {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: category['color'],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Mulai'),
               ),

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -11,7 +11,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  List<String> _rawHistory = [];
+  List<Map<String, dynamic>> _history = [];
 
   @override
   void initState() {
@@ -23,69 +23,64 @@ class _HistoryPageState extends State<HistoryPage> {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getStringList('quiz_history') ?? [];
 
+    final parsed =
+        data.map((e) => json.decode(e) as Map<String, dynamic>).toList();
+
     setState(() {
-      _rawHistory = data.reversed.toList(); // tampilkan terbaru di atas
+      _history = parsed.reversed.toList(); // urut dari terbaru
     });
   }
 
-  Future<void> _deleteItem(int index) async {
+  Future<void> _clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
-
-    final realIndex =
-        _rawHistory.length - 1 - index; // karena kita balik tampilannya
-
-    _rawHistory.removeAt(index);
-    await prefs.setStringList('quiz_history', _rawHistory.reversed.toList());
-
-    setState(() {});
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Riwayat berhasil dihapus')),
-    );
+    await prefs.remove('quiz_history');
+    setState(() {
+      _history = [];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final parsed =
-        _rawHistory.map((e) => json.decode(e) as Map<String, dynamic>).toList();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Riwayat Kuis',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: const Text('Riwayat Kuis'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        actions: [
+          if (_history.isNotEmpty)
+            IconButton(
+              onPressed: _clearHistory,
+              icon: const Icon(Icons.delete_forever),
+              tooltip: 'Hapus Semua',
+            ),
+        ],
       ),
-      body: parsed.isEmpty
-          ? const Center(child: Text('Belum ada kuis yang dikerjakan.'))
-          : ListView.separated(
+      body: _history.isEmpty
+          ? const Center(child: Text('Tidak ada riwayat.'))
+          : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: parsed.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemCount: _history.length,
               itemBuilder: (context, index) {
-                final item = parsed[index];
-                final time = DateTime.parse(item['time']).toLocal();
-
+                final item = _history[index];
+                final date = DateFormat('dd MMM yyyy HH:mm')
+                    .format(DateTime.parse(item['time']));
                 return Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
                   elevation: 2,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
                     title: Text(
-                      item['category'].toString().toUpperCase(),
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      item['category'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                    subtitle: Text(
-                      '${item['score']} dari ${item['total']} soal\n${time.day}/${time.month}/${time.year} ${time.hour}:${time.minute}',
-                      style: GoogleFonts.poppins(fontSize: 14),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () => _deleteItem(index),
-                      tooltip: 'Hapus riwayat ini',
-                    ),
+                    subtitle:
+                        Text('Skor: ${item['score']}/${item['total']}\n$date'),
+                    isThreeLine: true,
                   ),
                 );
               },
